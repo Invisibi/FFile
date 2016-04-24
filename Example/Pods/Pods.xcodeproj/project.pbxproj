@@ -175,6 +175,7 @@
 		C621FF2D1CCCD8C200FB7600 /* FFile.m in Sources */ = {isa = PBXBuildFile; fileRef = C621FF291CCCD8C200FB7600 /* FFile.m */; };
 		C621FF2E1CCCD8C200FB7600 /* NSURL+MimeType.h in Headers */ = {isa = PBXBuildFile; fileRef = C621FF2A1CCCD8C200FB7600 /* NSURL+MimeType.h */; };
 		C621FF2F1CCCD8C200FB7600 /* NSURL+MimeType.m in Sources */ = {isa = PBXBuildFile; fileRef = C621FF2B1CCCD8C200FB7600 /* NSURL+MimeType.m */; };
+		C621FF361CCCE52100FB7600 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BF6D2123B1D363C85A0356A3729A899 /* AWSCore.framework */; };
 		C6DFF645C3453774697A203380C6076D /* SPTPersistentCacheOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 060EF29E0B27D98C66C2AAEDDEC7D7EC /* SPTPersistentCacheOptions.m */; };
 		C8C2C25DF4BCDF574E22E7519EF6AC76 /* AWSMTLModel+NSCoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 0CE4AD94ABC593DB77CC6D8CA4FD17F4 /* AWSMTLModel+NSCoding.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C93E40B75E3D6D7589797884DF13EE8C /* FTransactionResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A73C29EB34FB51D3859F7D6574C525A /* FTransactionResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -587,6 +588,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C621FF361CCCE52100FB7600 /* AWSCore.framework in Frameworks */,
 				3310F6C60DFB7BCDB0029EE0C13CC9D0 /* AWSS3.framework in Frameworks */,
 				3B3C6BBA7EE035C0765D6E0C9492A2D5 /* Firebase.framework in Frameworks */,
 				9D895D978D7B0E3A5C186879B4413825 /* Foundation.framework in Frameworks */,
@@ -1712,6 +1714,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64 armv7 armv7s";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -1820,6 +1823,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64 armv7 armv7s";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
