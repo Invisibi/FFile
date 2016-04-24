@@ -182,6 +182,7 @@ static NSString *const kFileKeyPath = @"files";
                 if (error) {
                     block(NO, error);
                 } else {
+                    self.objectId = newRef.key;
                     block(YES, nil);
                 }
             }];
