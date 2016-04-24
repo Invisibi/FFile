@@ -157,7 +157,7 @@ static NSString *const kFileKeyPath = @"files";
 - (void)storeCache:(NSString *)key data:(NSData *)data block:(FDataResultBlock)block {
     [cache storeData:data forKey:key locked:YES withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
         if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
-            block(response.record.data, nil);
+            block(data, nil);
         } else {
             block(nil, response.error);
         }
