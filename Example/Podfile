@@ -3,8 +3,5 @@ use_frameworks!
 
 target 'FFile_Tests', :exclusive => true do
   pod 'FFile', :path => '../'
-  pod 'Firebase'
-  pod 'AWSS3'
-  pod 'SPTPersistentCache'
   
 end

@@ -2,7 +2,8 @@ PODS:
   - AWSCore (2.4.0)
   - AWSS3 (2.4.0):
     - AWSCore (= 2.4.0)
-  - FFile (0.1.0):
+  - FFile (0.1.3):
+    - AWSCore
     - AWSS3
     - Firebase
     - SPTPersistentCache
@@ -10,10 +11,7 @@ PODS:
   - SPTPersistentCache (1.0.0)
 
 DEPENDENCIES:
-  - AWSS3
   - FFile (from `../`)
-  - Firebase
-  - SPTPersistentCache
 
 EXTERNAL SOURCES:
   FFile:
@@ -22,7 +20,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AWSCore: 7e0da755786280a76ed4ab4ed8c1d38ced09b460
   AWSS3: dc00e788fb6733853ecd615a45f9d7dd6ce25823
-  FFile: 107a286f5dc3af2f3506ef32907930728c1ec367
+  FFile: cd1325ce51e3a5894057ab8a14e6fb70a8fc8181
   Firebase: 3565ea88b830f28f2c77ecc524622bc71a20d085
   SPTPersistentCache: c2ab4542796647387441169e352ba5f812128153
 
