@@ -8,7 +8,7 @@ s.summary = "Like the Parse File with AWS S3 and Firebase"
 s.requires_arc = true
 
 # 2
-s.version = "0.1.3"
+s.version = "0.1.4"
 
 # 3
 s.license = { :type => "MIT", :file => "LICENSE" }
@@ -37,6 +37,7 @@ s.source = { :git => "https://github.com/Invisibi/FFile.git", :tag => "#{s.versi
 # 7
 s.framework = "Foundation"
 s.framework = "MobileCoreServices"
+s.dependency 'AWSCore'
 s.dependency 'Firebase'
 s.dependency 'AWSS3'
 s.dependency 'SPTPersistentCache'
