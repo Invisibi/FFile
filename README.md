@@ -5,12 +5,10 @@
 [![License](https://img.shields.io/cocoapods/l/FFile.svg?style=flat)](http://cocoapods.org/pods/FFile)
 [![Platform](https://img.shields.io/cocoapods/p/FFile.svg?style=flat)](http://cocoapods.org/pods/FFile)
 
-## Usage
-
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
 ## Requirements
-
+```ruby
+iOS >= 8.0
+```
 ## Installation
 
 FFile is available through [CocoaPods](http://cocoapods.org). To install
@@ -19,7 +17,53 @@ it, simply add the following line to your Podfile:
 ```ruby
 pod "FFile"
 ```
+## Getting Started
 
+```swift
+FFile.setup("<Your AWS identity pool Id>",
+ s3URL: "<AWS Region URL>",
+ s3Bucket: "<AWS bucket>", 
+ s3Region: "<Your AWS bucket region>", 
+ firebaseURL: "<Your Firebase Root Path>")
+```
+### Description 
+- identity pool Id: Follow this link:
+http://docs.aws.amazon.com/mobile/sdkforios/developerguide/cognito-auth.html
+- s3URL: https://s3-ap-northeast-1.amazonaws.com/
+- s3Bucket: Muqq
+- s3Region: AWSRegionAPNortheast1
+- fireBaseURL: https://muqq.firebaseio.com/
+
+## Save file
+- Save to S3
+```swift
+let file = FFile(name: "example", data: data, fileExtension: "png")
+file.saveInBackgroundWithBlock { success, error in
+    if success {
+        //Do something if success
+    } else {
+        // handle error
+    }
+}
+```
+- After saved to S3, upload the file reference with your data to firebase
+```swift
+file.dictionary();
+//example
+firebaseRef.updateChildValue(file.dictionary())
+```
+## Get data
+```swift
+//dictionary is the file reference that you saved to firebaseRef
+let file = FFile(dictionary: dictionary)
+file.getDataInBackgroundWithBlock { data, error in
+    if error {
+        // handle error
+    } else {
+        // use your data
+    }
+}
+```
 ## Author
 
 muqq, bbbb55952000@gmail.com
