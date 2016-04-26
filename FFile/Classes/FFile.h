@@ -15,7 +15,7 @@
 typedef void (^FURLResultBlock)(NSURL *url, NSError *error);
 typedef void (^FBooleanResultBlock)(BOOL succeeded, NSError *error);
 typedef void (^FDataResultBlock)(NSData *data, NSError *error);
-
+typedef void (^FProgressBlock)(float progress);
 
 
 @interface FFile : NSObject
@@ -34,6 +34,8 @@ typedef void (^FDataResultBlock)(NSData *data, NSError *error);
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary;
 
 - (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block;
+
+- (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block withProgressBlock:(FProgressBlock)progressBlock;
 
 - (void)getDataInBackgroundWithBlock:(FDataResultBlock)block;
 

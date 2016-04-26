@@ -165,6 +165,10 @@ static NSString *const kFileKeyPath = @"files";
 }
 
 - (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block {
+    [self saveInBackgroundWithBlock:block withProgressBlock:nil];
+}
+
+- (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block withProgressBlock:(FProgressBlock)progressBlock {
     __weak FFile *weakSelf = self;
     FURLResultBlock saveCompletionBlock = ^void(NSURL *url, NSError *error) {
         if (error) {
@@ -172,11 +176,11 @@ static NSString *const kFileKeyPath = @"files";
         } else {
             weakSelf.url = url;
             NSDictionary *childValue = @{
-            @"name": [NSString stringWithFormat:@"%@.%@", weakSelf.name, weakSelf.fileExtension],
-            @"url": [url absoluteString],
-            @"createdAt": kFirebaseServerValueTimestamp,
-            @"mimeType": url.mimeType
-            };
+                                         @"name": [NSString stringWithFormat:@"%@.%@", weakSelf.name, weakSelf.fileExtension],
+                                         @"url": [url absoluteString],
+                                         @"createdAt": kFirebaseServerValueTimestamp,
+                                         @"mimeType": url.mimeType
+                                         };
             Firebase *newRef = weakSelf.fileRef.childByAutoId;
             [newRef updateChildValues:childValue withCompletionBlock:^(NSError *error, Firebase *ref) {
                 if (error) {
@@ -192,9 +196,9 @@ static NSString *const kFileKeyPath = @"files";
     if (self.url) {
         block(self.url, nil);
     } else if (self.filePath && self.filename) {
-        [self saveFileWithName:self.filename path:self.filePath block:saveCompletionBlock];
+        [self saveFileWithName:self.filename path:self.filePath block:saveCompletionBlock progressBlock:progressBlock];
     } else if (self.data && self.filename) {
-        [self saveFileWithName:self.filename data:self.data fileExtension:self.fileExtension block:saveCompletionBlock];
+        [self saveFileWithName:self.filename data:self.data fileExtension:self.fileExtension block:saveCompletionBlock progressBlock:progressBlock];
     } else {
         NSString *message = @"Should call get data first";
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-100 userInfo:@{NSLocalizedDescriptionKey: message}];
@@ -202,10 +206,10 @@ static NSString *const kFileKeyPath = @"files";
     }
 }
 
-- (void)saveFileWithName:(NSString *)name path:(NSURL *)path block:(FURLResultBlock)block {
+- (void)saveFileWithName:(NSString *)name path:(NSURL *)path block:(FURLResultBlock)block progressBlock:(FProgressBlock)progressBlock {
     NSData *data = [NSData dataWithContentsOfFile:path.path];
     if (data) {
-        [self saveFileWithName:name data:data fileExtension:path.pathExtension block:block];
+        [self saveFileWithName:name data:data fileExtension:path.pathExtension block:block progressBlock:progressBlock];
     } else {
         NSString *message = [NSString stringWithFormat:@"Filed to find file at path %@", path.path];
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:@{NSLocalizedDescriptionKey: message}];
@@ -213,7 +217,7 @@ static NSString *const kFileKeyPath = @"files";
     }
 }
 
-- (void)saveFileWithName:(NSString *)name data:(NSData *)data fileExtension:(NSString *)fileExtension block:(FURLResultBlock)block {
+- (void)saveFileWithName:(NSString *)name data:(NSData *)data fileExtension:(NSString *)fileExtension block:(FURLResultBlock)block progressBlock:(FProgressBlock)progressBlock {
     NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
     cacheDirectory = [cacheDirectory stringByAppendingString:@"/com.kymco.sunray.cache/"];
     dispatch_queue_t backgroundQueue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
@@ -261,6 +265,15 @@ static NSString *const kFileKeyPath = @"files";
             });
             return nil;
         }];
+
+        if (progressBlock) {
+            uploadRequest.uploadProgress =  ^(int64_t bytesSent, int64_t totalBytesSent, int64_t totalBytesExpectedToSend){
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    float progress = (float)totalBytesSent / (float)totalBytesExpectedToSend;
+                    progressBlock(progress);
+                });
+            };
+        }
     });
 }
 
