@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <Firebase/Firebase.h>
 #import <AWSS3/AWSS3.h>
 #import <AWSCore/AWSCore.h>
 #import <SPTPersistentCache/SPTPersistentCache.h>
@@ -21,26 +20,21 @@ typedef void (^FProgressBlock)(float progress);
 @interface FFile : NSObject
 
 @property (nonatomic, strong) NSURL *url;
-@property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *objectId;
 @property (nonatomic, getter=isDataAvailable, readonly) BOOL isDataAvailable;
 
-+ (void)setup:(NSString *)awsIdentityPoolId s3URL:(NSString *)s3URL s3Bucket:(NSString *)bucket s3Region:(AWSRegionType)regionTyoe firebaseURL:(NSString *)firebaseURL;
++ (void)setup:(NSString *)awsIdentityPoolId s3URL:(NSString *)s3URL s3Bucket:(NSString *)bucket s3Region:(AWSRegionType)regionTyoe;
 
 - (instancetype)initWithName:(NSString *)name filePath:(NSURL *)path;
 
 - (instancetype)initWithName:(NSString *)name data:(NSData *)data fileExtension:(NSString *)fileExtension;
 
-- (instancetype)initWithDictionary:(NSDictionary *)dictionary;
+- (instancetype)initWithobjectId:(NSString *)objectId;
 
 - (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block;
 
 - (void)saveInBackgroundWithBlock:(FBooleanResultBlock)block withProgressBlock:(FProgressBlock)progressBlock;
 
 - (void)getDataInBackgroundWithBlock:(FDataResultBlock)block;
-
-// this method should be called only after save in background
-- (NSDictionary *)dictionary;
-
 
 @end

@@ -7,16 +7,12 @@
 //
 
 #import "FFile.h"
-#import "NSURL+MimeType.h"
 
 @interface FFile()
 
 @property (nonatomic, strong) NSData *data;
 @property (nonatomic, strong) NSString *fileExtension;
-@property (nonatomic, strong) NSString *UUID;
 @property (nonatomic, strong) NSURL *filePath;
-@property (nonatomic, strong) Firebase *fileRef;
-@property (nonatomic, strong, readonly, getter=filename) NSString *filename;
 
 @end
 
@@ -24,30 +20,19 @@
 
 static NSString *_s3URL;
 static NSString *_s3Bucket;
-static Firebase *_firebaseRef;
 static SPTPersistentCache *cache;
 static NSString *const kFileKeyPath = @"files";
 
-- (NSString *)filename {
-    if (self.name && self.UUID) {
-        NSString *name = [NSString stringWithFormat:@"%@-%@", self.UUID, self.name];
-        return name;
-    } else {
-        return nil;
-    }
-}
-
 - (BOOL)isDataAvailable {
-    return (self.objectId != nil && self.url != nil);
+    return self.data != nil;
 }
 
-+ (void)setup:(NSString *)awsIdentityPoolId s3URL:(NSString *)s3URL s3Bucket:(NSString *)bucket s3Region:(AWSRegionType)regionTyoe firebaseURL:(NSString *)firebaseURL {
++ (void)setup:(NSString *)awsIdentityPoolId s3URL:(NSString *)s3URL s3Bucket:(NSString *)bucket s3Region:(AWSRegionType)regionTyoe {
     AWSCognitoCredentialsProvider *credentialsProvider = [[AWSCognitoCredentialsProvider alloc] initWithRegionType:regionTyoe identityPoolId:awsIdentityPoolId];
     AWSServiceConfiguration *configuration = [[AWSServiceConfiguration alloc] initWithRegion:regionTyoe credentialsProvider:credentialsProvider];
     [AWSServiceManager defaultServiceManager].defaultServiceConfiguration = configuration;
     _s3URL = s3URL;
     _s3Bucket = bucket;
-    _firebaseRef = [[Firebase alloc] initWithUrl:firebaseURL];
 
     NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"/com.kymco.sunray.cache/"];
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath identifier:@"com.kymco.sunray.cache" defaultExpirationInterval:60 * 60 * 24 garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec) debug:^(NSString * _Nonnull string) {
@@ -61,11 +46,9 @@ static NSString *const kFileKeyPath = @"files";
 - (instancetype)initWithName:(NSString *)name filePath:(NSURL *)path {
     self = [super init];
     if (self) {
-        self.name = name;
         self.filePath = path;
         self.fileExtension = path.pathExtension;
-        self.fileRef = [_firebaseRef childByAppendingPath:kFileKeyPath];
-        self.UUID = [[NSUUID UUID] UUIDString];
+        self.objectId = [NSString stringWithFormat:@"%@-%@.%@", [[NSUUID UUID] UUIDString], name, self.fileExtension];
     }
     return self;
 }
@@ -73,49 +56,27 @@ static NSString *const kFileKeyPath = @"files";
 - (instancetype)initWithName:(NSString *)name data:(NSData *)data fileExtension:(NSString *)fileExtension {
     self = [super init];
     if (self) {
-        self.name = name;
         self.data = data;
         self.fileExtension = fileExtension;
-        self.fileRef = [_firebaseRef childByAppendingPath:kFileKeyPath];
-        self.UUID = [[NSUUID UUID] UUIDString];
+        self.objectId = [NSString stringWithFormat:@"%@-%@.%@", [[NSUUID UUID] UUIDString], name, self.fileExtension];
     }
     return self;
 }
 
-- (instancetype)initWithDictionary:(NSDictionary *)dictionary {
+- (instancetype)initWithobjectId:(NSString *)objectId {
     self = [super init];
     if (self) {
-        if ([dictionary[@"type"] isEqualToString:@"file"]) {
-            self.objectId = dictionary[@"key"];
-            self.fileRef = [_firebaseRef childByAppendingPath:kFileKeyPath];
-        } else {
-            @throw NSInternalInconsistencyException;
-        }
+        NSString *URLPath = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, objectId];
+        ;
+        self.url = [[NSURL alloc] initWithString:URLPath];
+        self.objectId = objectId;
     }
     return self;
-}
-
-- (NSDictionary *)dictionary {
-    NSDictionary *dict = @{@"key": self.objectId, @"type": @"file"};
-    return dict;
 }
 
 - (void)getDataInBackgroundWithBlock:(FDataResultBlock)block {
     if (self.objectId) {
-        __weak FFile *weakSelf = self;
-        [[self.fileRef childByAppendingPath:self.objectId] observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-            NSDictionary *value = snapshot.value;
-            weakSelf.name = value[@"name"];
-            weakSelf.url = [NSURL URLWithString:value[@"url"]];
-            weakSelf.fileExtension = weakSelf.url.pathExtension;
-            NSString *key = [weakSelf.url.absoluteString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-            [weakSelf loadCache:key block:block];
-        }];
-    } else if (self.url) {
-        NSString *key = [self.url.absoluteString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-        [self loadCache:key block:block];
-    } else if (self.filename) {
-        NSString *key = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, self.filename];
+        NSString *key = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, self.objectId];
         key = [key stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
         [self loadCache:key block:block];
     } else {
@@ -175,30 +136,16 @@ static NSString *const kFileKeyPath = @"files";
             block(NO, error);
         } else {
             weakSelf.url = url;
-            NSDictionary *childValue = @{
-                                         @"name": [NSString stringWithFormat:@"%@.%@", weakSelf.name, weakSelf.fileExtension],
-                                         @"url": [url absoluteString],
-                                         @"createdAt": kFirebaseServerValueTimestamp,
-                                         @"mimeType": url.mimeType
-                                         };
-            Firebase *newRef = weakSelf.fileRef.childByAutoId;
-            [newRef updateChildValues:childValue withCompletionBlock:^(NSError *error, Firebase *ref) {
-                if (error) {
-                    block(NO, error);
-                } else {
-                    self.objectId = newRef.key;
-                    block(YES, nil);
-                }
-            }];
+            block(YES, nil);
         }
     };
 
     if (self.url) {
-        block(self.url, nil);
-    } else if (self.filePath && self.filename) {
-        [self saveFileWithName:self.filename path:self.filePath block:saveCompletionBlock progressBlock:progressBlock];
-    } else if (self.data && self.filename) {
-        [self saveFileWithName:self.filename data:self.data fileExtension:self.fileExtension block:saveCompletionBlock progressBlock:progressBlock];
+        block(YES, nil);
+    } else if (self.filePath && self.objectId) {
+        [self saveFileWithName:self.objectId path:self.filePath block:saveCompletionBlock progressBlock:progressBlock];
+    } else if (self.data && self.objectId) {
+        [self saveFileWithName:self.objectId data:self.data block:saveCompletionBlock progressBlock:progressBlock];
     } else {
         NSString *message = @"Should call get data first";
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-100 userInfo:@{NSLocalizedDescriptionKey: message}];
@@ -209,7 +156,7 @@ static NSString *const kFileKeyPath = @"files";
 - (void)saveFileWithName:(NSString *)name path:(NSURL *)path block:(FURLResultBlock)block progressBlock:(FProgressBlock)progressBlock {
     NSData *data = [NSData dataWithContentsOfFile:path.path];
     if (data) {
-        [self saveFileWithName:name data:data fileExtension:path.pathExtension block:block progressBlock:progressBlock];
+        [self saveFileWithName:name data:data block:block progressBlock:progressBlock];
     } else {
         NSString *message = [NSString stringWithFormat:@"Filed to find file at path %@", path.path];
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:@{NSLocalizedDescriptionKey: message}];
@@ -217,13 +164,12 @@ static NSString *const kFileKeyPath = @"files";
     }
 }
 
-- (void)saveFileWithName:(NSString *)name data:(NSData *)data fileExtension:(NSString *)fileExtension block:(FURLResultBlock)block progressBlock:(FProgressBlock)progressBlock {
+- (void)saveFileWithName:(NSString *)name data:(NSData *)data block:(FURLResultBlock)block progressBlock:(FProgressBlock)progressBlock {
     NSString *cacheDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
     cacheDirectory = [cacheDirectory stringByAppendingString:@"/com.kymco.sunray.cache/"];
     dispatch_queue_t backgroundQueue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
     dispatch_async(backgroundQueue, ^{
-        NSString *fileName = fileExtension == nil ? name : [NSString stringWithFormat:@"%@.%@", name, fileExtension];
-        NSString *URLPath = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, fileName];
+        NSString *URLPath = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, name];
         ;
         NSString *encodeURL = [URLPath stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
         NSString *filePath = [NSString stringWithFormat:@"%@%@", cacheDirectory, encodeURL];
@@ -250,7 +196,7 @@ static NSString *const kFileKeyPath = @"files";
         uploadRequest.bucket = _s3Bucket;
         uploadRequest.body = [NSURL fileURLWithPath:filePath];
         uploadRequest.ACL = AWSS3BucketCannedACLPublicReadWrite;
-        uploadRequest.key = [NSString stringWithFormat:@"file/%@", fileName];
+        uploadRequest.key = [NSString stringWithFormat:@"file/%@", name];
         AWSS3TransferManager *transferManager = [AWSS3TransferManager defaultS3TransferManager];
         [[transferManager upload:uploadRequest] continueWithBlock:^id(AWSTask *task) {
             dispatch_async(dispatch_get_main_queue(), ^{
