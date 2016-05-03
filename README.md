@@ -23,8 +23,7 @@ pod "FFile"
 FFile.setup("<Your AWS identity pool Id>",
  s3URL: "<AWS Region URL>",
  s3Bucket: "<AWS bucket>", 
- s3Region: "<Your AWS bucket region>", 
- firebaseURL: "<Your Firebase Root Path>")
+ s3Region: "<Your AWS bucket region>" 
 ```
 ### Description 
 - identity pool Id: Follow this link:
@@ -32,7 +31,6 @@ http://docs.aws.amazon.com/mobile/sdkforios/developerguide/cognito-auth.html
 - s3URL: https://s3-ap-northeast-1.amazonaws.com/
 - s3Bucket: Muqq
 - s3Region: AWSRegionAPNortheast1
-- fireBaseURL: https://muqq.firebaseio.com/
 
 ## Save file
 - Save to S3
@@ -48,14 +46,13 @@ file.saveInBackgroundWithBlock { success, error in
 ```
 - After saved to S3, upload the file reference with your data to firebase
 ```swift
-file.dictionary();
-//example
-firebaseRef.updateChildValue(file.dictionary())
+//get your objectId and save it to anywhere
+file.objectId
 ```
 ## Get data
 ```swift
-//dictionary is the file reference that you saved to firebaseRef
-let file = FFile(dictionary: dictionary)
+//use objectId to get your file
+let file = FFile(objectId: objectId)
 file.getDataInBackgroundWithBlock { data, error in
     if error {
         // handle error
