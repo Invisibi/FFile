@@ -4,11 +4,11 @@ Pod::Spec.new do |s|
 s.platform = :ios
 s.ios.deployment_target = '8.0'
 s.name = "FFile"
-s.summary = "Like the Parse File with AWS S3 and Firebase"
+s.summary = "Auto save File with AWS S3"
 s.requires_arc = true
 
 # 2
-s.version = "0.1.5"
+s.version = "0.1.6"
 
 # 3
 s.license = { :type => "MIT", :file => "LICENSE" }
@@ -27,7 +27,6 @@ s.source = { :git => "https://github.com/Invisibi/FFile.git", :tag => "#{s.versi
 s.framework = "Foundation"
 s.framework = "MobileCoreServices"
 s.dependency 'AWSCore'
-s.dependency 'Firebase'
 s.dependency 'AWSS3'
 s.dependency 'SPTPersistentCache'
 
