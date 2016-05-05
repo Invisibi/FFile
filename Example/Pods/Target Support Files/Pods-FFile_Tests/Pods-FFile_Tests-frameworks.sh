@@ -87,13 +87,11 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods-FFile_Tests/AWSCore.framework"
   install_framework "Pods-FFile_Tests/AWSS3.framework"
   install_framework "Pods-FFile_Tests/FFile.framework"
-  install_framework "Pods-FFile_Tests/Firebase.framework"
   install_framework "Pods-FFile_Tests/SPTPersistentCache.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods-FFile_Tests/AWSCore.framework"
   install_framework "Pods-FFile_Tests/AWSS3.framework"
   install_framework "Pods-FFile_Tests/FFile.framework"
-  install_framework "Pods-FFile_Tests/Firebase.framework"
   install_framework "Pods-FFile_Tests/SPTPersistentCache.framework"
 fi

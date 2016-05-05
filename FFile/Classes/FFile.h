@@ -37,4 +37,6 @@ typedef void (^FProgressBlock)(float progress);
 
 - (void)getDataInBackgroundWithBlock:(FDataResultBlock)block;
 
+- (void)getFilePathInBackgroundWithBlock:(FURLResultBlock)block;
+
 @end

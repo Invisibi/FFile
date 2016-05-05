@@ -22,6 +22,7 @@ static NSString *_s3URL;
 static NSString *_s3Bucket;
 static SPTPersistentCache *cache;
 static NSString *const kFileKeyPath = @"files";
+static NSString *cachePath;
 
 - (BOOL)isDataAvailable {
     return self.data != nil;
@@ -34,7 +35,7 @@ static NSString *const kFileKeyPath = @"files";
     _s3URL = s3URL;
     _s3Bucket = bucket;
 
-    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"/com.kymco.sunray.cache/"];
+    cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingString:@"/com.kymco.sunray.cache/"];
     SPTPersistentCacheOptions *options = [[SPTPersistentCacheOptions alloc] initWithCachePath:cachePath identifier:@"com.kymco.sunray.cache" defaultExpirationInterval:60 * 60 * 24 garbageCollectorInterval:(NSUInteger)(1.5 * SPTPersistentCacheDefaultGCIntervalSec) debug:^(NSString * _Nonnull string) {
         NSLog(@"%@", string);
     }];
@@ -83,6 +84,20 @@ static NSString *const kFileKeyPath = @"files";
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:-101 userInfo:@{NSLocalizedDescriptionKey: @"Invalid FFile"}];
         block(nil, error);
     }
+}
+
+- (void)getFilePathInBackgroundWithBlock:(FURLResultBlock)block {
+    [self getDataInBackgroundWithBlock:^(NSData *data, NSError *error) {
+        if (error) {
+            block(nil, error);
+        } else {
+            NSString *key = [NSString stringWithFormat:@"%@%@/file/%@", _s3URL, _s3Bucket, self.objectId];
+            key = [key stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+            NSString *filePath = [cachePath stringByAppendingString:[NSString stringWithFormat:@"ht/%@", key]];
+            NSURL *fileURL = [NSURL fileURLWithPath:filePath];
+            block(fileURL, nil);
+        }
+    }];
 }
 
 - (void)loadCache:(NSString *)key block:(FDataResultBlock)block {
