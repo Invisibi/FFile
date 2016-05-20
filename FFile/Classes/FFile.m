@@ -101,17 +101,17 @@ static NSString *cachePath;
 }
 
 - (void)loadCache:(NSString *)key block:(FDataResultBlock)block {
+    __weak FFile *weakself = self;
     [cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
         if (response.result == SPTPersistentCacheResponseCodeOperationSucceeded) {
             block(response.record.data, nil);
         } else if (response.result == SPTPersistentCacheResponseCodeNotFound) {
-            if (self.data) {
-                [self storeCache:key data:self.data block:block];
-            } else if (self.filePath.path) {
-                NSData *data = [NSData dataWithContentsOfFile:self.filePath.path];
-                [self storeCache:key data:data block:block];
-            } else if (self.url) {
-                __weak FFile *weakself = self;
+            if (weakself.data) {
+                [weakself storeCache:key data:weakself.data block:block];
+            } else if (weakself.filePath.path) {
+                NSData *data = [NSData dataWithContentsOfFile:weakself.filePath.path];
+                [weakself storeCache:key data:data block:block];
+            } else if (weakself.url) {
                 dispatch_queue_t backgroundQueue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
                 dispatch_async(backgroundQueue, ^{
                     NSData *data = [NSData dataWithContentsOfURL:weakself.url];
