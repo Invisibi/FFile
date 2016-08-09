@@ -100,6 +100,15 @@ static NSString *cachePath;
     }];
 }
 
+dispatch_queue_t backgroundQueue() {
+    static dispatch_once_t queueCreationGuard;
+    static dispatch_queue_t queue;
+    dispatch_once(&queueCreationGuard, ^{
+        queue = dispatch_queue_create("com.something.myapp.backgroundQueue", 0);
+    });
+    return queue;
+}
+
 - (void)loadCache:(NSString *)key block:(FDataResultBlock)block {
     __weak FFile *weakself = self;
     [cache loadDataForKey:key withCallback:^(SPTPersistentCacheResponse * _Nonnull response) {
@@ -112,8 +121,8 @@ static NSString *cachePath;
                 NSData *data = [NSData dataWithContentsOfFile:weakself.filePath.path];
                 [weakself storeCache:key data:data block:block];
             } else if (weakself.url) {
-                dispatch_queue_t backgroundQueue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
-                dispatch_async(backgroundQueue, ^{
+                dispatch_queue_t queue = backgroundQueue();
+                dispatch_async(queue, ^{
                     NSData *data = [NSData dataWithContentsOfURL:weakself.url];
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [weakself storeCache:key data:data block:block];
