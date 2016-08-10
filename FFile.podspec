@@ -8,7 +8,7 @@ s.summary = "Auto save File with AWS S3"
 s.requires_arc = true
 
 # 2
-s.version = "0.1.8"
+s.version = "0.1.9"
 
 # 3
 s.license = { :type => "MIT", :file => "LICENSE" }
