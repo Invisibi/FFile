@@ -26,8 +26,8 @@ s.source = { :git => "https://github.com/Invisibi/FFile.git", :tag => "#{s.versi
 # 7
 s.framework = "Foundation"
 s.framework = "MobileCoreServices"
-s.dependency 'AWSCore'
-s.dependency 'AWSS3'
+s.dependency 'AWSCore', '2.4.7'
+s.dependency 'AWSS3', '2.4.7'
 s.dependency 'SPTPersistentCache'
 
 # 8

@@ -1,10 +1,10 @@
 PODS:
-  - AWSCore (2.4.1)
-  - AWSS3 (2.4.1):
-    - AWSCore (= 2.4.1)
-  - FFile (0.1.7):
-    - AWSCore
-    - AWSS3
+  - AWSCore (2.4.7)
+  - AWSS3 (2.4.7):
+    - AWSCore (= 2.4.7)
+  - FFile (0.1.9):
+    - AWSCore (= 2.4.7)
+    - AWSS3 (= 2.4.7)
     - SPTPersistentCache
   - SPTPersistentCache (1.0.0)
 
@@ -16,9 +16,9 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  AWSCore: 9bfd632f04aaf12053e639d2a9120372844beb0d
-  AWSS3: d7a3a694ffc4010e90b14755b5b9dbf70989c117
-  FFile: 7d74948c380376affa41e2b553e1edef7a800a65
+  AWSCore: 9a729a3c0050a51ece3547d546c327acdac7838a
+  AWSS3: 0f3c8ed11e04cd78cf86ed396c06330ab142db7a
+  FFile: b4b67be4a88ea268baae1da05f5ca797cb25682b
   SPTPersistentCache: c2ab4542796647387441169e352ba5f812128153
 
 COCOAPODS: 0.39.0
